@@ -94,7 +94,12 @@ do
       Console.WriteLine($"{item.CategoryId}) {item.CategoryName}");
     }
     Console.ForegroundColor = ConsoleColor.White;
-    int id = int.Parse(Console.ReadLine()!);
+    if (!int.TryParse(Console.ReadLine(), out int id))
+    {
+      Console.WriteLine("Invalid categoryID.");
+      logger.Warn("Invalid category ID entered");
+      continue;
+    }
     Console.Clear();
     logger.Info($"CategoryId {id} selected");
     Category? category = db.Categories
