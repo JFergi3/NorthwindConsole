@@ -80,12 +80,12 @@ do
       if (product.Discontinued)
       {
         Console.ForegroundColor = ConsoleColor.Red;
-        Console.WriteLine($"{product.ProductName} (DISCONTINUED)");
+        Console.WriteLine($"{product.ProductId}) {product.ProductName} (DISCONTINUED)");
       }
       else
       {
         Console.ForegroundColor = ConsoleColor.White;
-        Console.WriteLine(product.ProductName);
+        Console.WriteLine($"{product.ProductId}) {product.ProductName}");
       }
     }
 
