@@ -217,17 +217,134 @@ do
 
   else if (choice == "4") // Edit Product
   {
-    var db = new DataContext();
-    var query = db.Categories.Include("Products").OrderBy(p => p.CategoryId);
-    foreach (var item in query)
+    using var db = new DataContext();
+
+    Console.WriteLine("Enter Product ID to edit:");
+    if (!int.TryParse(Console.ReadLine(), out int id))
     {
-      Console.WriteLine($"{item.CategoryName}");
-      foreach (Product p in item.Products)
+      Console.ForegroundColor = ConsoleColor.Red;
+      Console.WriteLine("Invalid Product ID.");
+      Console.ForegroundColor = ConsoleColor.White;
+      logger.Warn("Invalid Product ID entered for edit.");
+      continue;
+    }
+
+    Product? product = db.Products.FirstOrDefault(p => p.ProductId == id);
+
+    if (product == null)
+    {
+      Console.ForegroundColor = ConsoleColor.Red;
+      Console.WriteLine("Product not found.");
+      Console.ForegroundColor = ConsoleColor.White;
+      logger.Warn("Product ID {id} not found for edit.", id);
+      continue;
+    }
+
+    Console.WriteLine($"Editing: {product.ProductName}");
+    Console.WriteLine("Press Enter to keep the current value.");
+
+    Console.WriteLine($"Product Name ({product.ProductName}):");
+    string? productName = Console.ReadLine();
+    if (!string.IsNullOrWhiteSpace(productName))
+    {
+      product.ProductName = productName;
+    }
+
+    Console.WriteLine($"Quantity Per Unit ({product.QuantityPerUnit}):");
+    string? quantityPerUnit = Console.ReadLine();
+    if (!string.IsNullOrWhiteSpace(quantityPerUnit))
+    {
+      product.QuantityPerUnit = quantityPerUnit;
+    }
+
+    Console.WriteLine($"Unit Price ({product.UnitPrice}):");
+    string? unitPriceInput = Console.ReadLine();
+    if (!string.IsNullOrWhiteSpace(unitPriceInput))
+    {
+      if (decimal.TryParse(unitPriceInput, out decimal unitPrice))
       {
-        Console.WriteLine($"\t{p.ProductName}");
+        product.UnitPrice = unitPrice;
+      }
+      else
+      {
+        Console.ForegroundColor = ConsoleColor.Red;
+        Console.WriteLine("Invalid price. Product was not updated.");
+        Console.ForegroundColor = ConsoleColor.White;
+        logger.Warn("Invalid UnitPrice entered while editing Product ID {id}.", id);
+        continue;
       }
     }
+
+    Console.WriteLine($"Units In Stock ({product.UnitsInStock}):");
+    string? unitsInStockInput = Console.ReadLine();
+    if (!string.IsNullOrWhiteSpace(unitsInStockInput))
+    {
+      if (short.TryParse(unitsInStockInput, out short unitsInStock))
+      {
+        product.UnitsInStock = unitsInStock;
+      }
+      else
+      {
+        Console.ForegroundColor = ConsoleColor.Red;
+        Console.WriteLine("Invalid units in stock. Product was not updated.");
+        Console.ForegroundColor = ConsoleColor.White;
+        logger.Warn("Invalid UnitsInStock entered while editing Product ID {id}.", id);
+        continue;
+      }
+    }
+
+    Console.WriteLine($"Units On Order ({product.UnitsOnOrder}):");
+    string? unitsOnOrderInput = Console.ReadLine();
+    if (!string.IsNullOrWhiteSpace(unitsOnOrderInput))
+    {
+      if (short.TryParse(unitsOnOrderInput, out short unitsOnOrder))
+      {
+        product.UnitsOnOrder = unitsOnOrder;
+      }
+      else
+      {
+        Console.ForegroundColor = ConsoleColor.Red;
+        Console.WriteLine("Invalid units on order. Product was not updated.");
+        Console.ForegroundColor = ConsoleColor.White;
+        logger.Warn("Invalid UnitsOnOrder entered while editing Product ID {id}.", id);
+        continue;
+      }
+    }
+
+    Console.WriteLine($"Reorder Level ({product.ReorderLevel}):");
+    string? reorderLevelInput = Console.ReadLine();
+    if (!string.IsNullOrWhiteSpace(reorderLevelInput))
+    {
+      if (short.TryParse(reorderLevelInput, out short reorderLevel))
+      {
+        product.ReorderLevel = reorderLevel;
+      }
+      else
+      {
+        Console.ForegroundColor = ConsoleColor.Red;
+        Console.WriteLine("Invalid reorder level. Product was not updated.");
+        Console.ForegroundColor = ConsoleColor.White;
+        logger.Warn("Invalid ReorderLevel entered while editing Product ID {id}.", id);
+        continue;
+      }
+    }
+
+    Console.WriteLine($"Discontinued ({(product.Discontinued ? "Yes" : "No")}) y/n or Enter to keep:");
+    string? discontinuedInput = Console.ReadLine();
+    if (!string.IsNullOrWhiteSpace(discontinuedInput))
+    {
+      product.Discontinued = discontinuedInput.ToLower() == "y";
+    }
+
+    db.SaveChanges();
+
+    Console.ForegroundColor = ConsoleColor.Green;
+    Console.WriteLine("Product updated successfully.");
+    Console.ForegroundColor = ConsoleColor.White;
+
+    logger.Info("Product ID {id} updated.", id);
   }
+  
   else if (choice == "5") // Delete Product
   {
 
