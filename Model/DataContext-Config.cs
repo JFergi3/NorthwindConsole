@@ -9,6 +9,7 @@ public partial class DataContext : DbContext
   protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
   {
     var configuration = new ConfigurationBuilder()
+            .SetBasePath(Directory.GetCurrentDirectory()) //always finds config file
             .AddJsonFile($"appsettings.json");
 
     var config = configuration.Build();
