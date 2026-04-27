@@ -100,9 +100,12 @@ do
     Console.WriteLine("Enter Product ID:");
     if (!int.TryParse(Console.ReadLine(), out int id))
     {
-        Console.WriteLine("Invalid Product ID.");
-        logger.Warn("Invalid Product ID entered.");
-        continue;
+      Console.ForegroundColor = ConsoleColor.Red;
+      Console.WriteLine("Invalid Product ID.");
+      Console.ForegroundColor = ConsoleColor.White;
+
+      logger.Warn("Invalid Product ID entered.");
+      continue;
     }
 
     Product? product = db.Products
@@ -112,9 +115,12 @@ do
 
     if (product == null)
     {
-        Console.WriteLine("Product not found.");
-        logger.Warn("Product ID {id} not found.", id);
-        continue;
+      Console.ForegroundColor = ConsoleColor.Red;
+      Console.WriteLine("Product not found.");
+      Console.ForegroundColor = ConsoleColor.White;
+      
+      logger.Warn("Product ID {id} not found.", id);
+      continue;
     }
 
     Console.WriteLine($"Product ID: {product.ProductId}");
@@ -131,7 +137,7 @@ do
     Console.WriteLine($"Discontinued: {(product.Discontinued ? "Yes" : "No")}");
 
     logger.Info("Displayed Product ID {id}.", id);
-}
+  }
 
   else if (choice == "3") // Add Product 
   {
