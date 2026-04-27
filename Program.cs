@@ -95,47 +95,44 @@ do
 
   else if (choice == "2") // Display Specific Product
   {
-    Category category = new();
-
-    Console.WriteLine("Enter Category Name:");
-    category.CategoryName = Console.ReadLine()!;
-
-    Console.WriteLine("Enter the Category Description:");
-    category.Description = Console.ReadLine();
-
-    ValidationContext context = new(category, null, null);
-    List<ValidationResult> results = new();
-
-    var isValid = Validator.TryValidateObject(category, context, results, true);
-
     using var db = new DataContext();
 
-    if (isValid)
+    Console.WriteLine("Enter Product ID:");
+    if (!int.TryParse(Console.ReadLine(), out int id))
     {
-      if (db.Categories.Any(c => c.CategoryName == category.CategoryName))
-      {
-        isValid = false;
-        results.Add(new ValidationResult("Category name already exists.", ["CategoryName"]));
-      }
-      else
-      {
-        db.Categories.Add(category);
-        db.SaveChanges();
-
-        logger.Info("Category added: {name}", category.CategoryName);
-        Console.WriteLine("Category added successfully.");
-      }
+        Console.WriteLine("Invalid Product ID.");
+        logger.Warn("Invalid Product ID entered.");
+        continue;
     }
 
-    if (!isValid)
+    Product? product = db.Products
+        .Include(p => p.Category)
+        .Include(p => p.Supplier)
+        .FirstOrDefault(p => p.ProductId == id);
+
+    if (product == null)
     {
-      foreach (var result in results)
-      {
-        logger.Error("{member} : {message}", result.MemberNames.First(), result.ErrorMessage);
-        Console.WriteLine($"{result.MemberNames.First()} : {result.ErrorMessage}");
-      }
+        Console.WriteLine("Product not found.");
+        logger.Warn("Product ID {id} not found.", id);
+        continue;
     }
-  }
+
+    Console.WriteLine($"Product ID: {product.ProductId}");
+    Console.WriteLine($"Product Name: {product.ProductName}");
+    Console.WriteLine($"Supplier ID: {product.SupplierId}");
+    Console.WriteLine($"Supplier: {product.Supplier?.CompanyName ?? "None"}");
+    Console.WriteLine($"Category ID: {product.CategoryId}");
+    Console.WriteLine($"Category: {product.Category?.CategoryName ?? "None"}");
+    Console.WriteLine($"Quantity Per Unit: {product.QuantityPerUnit}");
+    Console.WriteLine($"Unit Price: {product.UnitPrice:C}");
+    Console.WriteLine($"Units In Stock: {product.UnitsInStock}");
+    Console.WriteLine($"Units On Order: {product.UnitsOnOrder}");
+    Console.WriteLine($"Reorder Level: {product.ReorderLevel}");
+    Console.WriteLine($"Discontinued: {(product.Discontinued ? "Yes" : "No")}");
+
+    logger.Info("Displayed Product ID {id}.", id);
+}
+
   else if (choice == "3") // Add Product 
   {
     var db = new DataContext();
