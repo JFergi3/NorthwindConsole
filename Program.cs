@@ -345,6 +345,7 @@ do
     logger.Info("Product ID {id} updated.", id);
   }
   // --------------------------------------------------------Grade C complete----------------------------------------------------
+
   
   else if (choice == "5") // Delete Product
   {
