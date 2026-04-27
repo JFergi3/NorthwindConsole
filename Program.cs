@@ -97,7 +97,16 @@ do
     int id = int.Parse(Console.ReadLine()!);
     Console.Clear();
     logger.Info($"CategoryId {id} selected");
-    Category category = db.Categories.Include("Products").FirstOrDefault(c => c.CategoryId == id)!;
+    Category? category = db.Categories
+        .Include(c => c.Products.Where(p => !p.Discontinued))
+        .FirstOrDefault(c => c.CategoryId == id);
+    if (category == null)
+    {
+      Console.WriteLine("Category not found.");
+      logger.Warn("CategoryId {id} not found", id);
+      continue;
+    }
+
     Console.WriteLine($"{category.CategoryName} - {category.Description}");
     foreach (Product p in category.Products)
     {
