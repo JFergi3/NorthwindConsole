@@ -39,45 +39,48 @@ do
     Console.ForegroundColor = ConsoleColor.White;
   }
   else if (choice == "2")
-  {
-    // Add category
+{
     Category category = new();
+
     Console.WriteLine("Enter Category Name:");
     category.CategoryName = Console.ReadLine()!;
+
     Console.WriteLine("Enter the Category Description:");
     category.Description = Console.ReadLine();
-    ValidationContext context = new ValidationContext(category, null, null);
-    List<ValidationResult> results = new List<ValidationResult>();
+
+    ValidationContext context = new(category, null, null);
+    List<ValidationResult> results = new();
 
     var isValid = Validator.TryValidateObject(category, context, results, true);
+
+    using var db = new DataContext();
+
     if (isValid)
     {
-      var db = new DataContext();
-      // check for unique name
-      if (db.Categories.Any(c => c.CategoryName == category.CategoryName))
-      {
-        // generate validation error
-        isValid = false;
-        results.Add(new ValidationResult("Name exists", ["CategoryName"]));
-      }
-      else
-      {
-        logger.Info("Validation passed");
-        //save category to db
-        db.Categories.Add(category);
-        db.SaveChanges();
-        logger.Info("Category add: {name}", category.CategoryName);
-        Console.WriteLine("Category added successfully. ");
-      }
+        if (db.Categories.Any(c => c.CategoryName == category.CategoryName))
+        {
+            isValid = false;
+            results.Add(new ValidationResult("Category name already exists.", ["CategoryName"]));
+        }
+        else
+        {
+            db.Categories.Add(category);
+            db.SaveChanges();
+
+            logger.Info("Category added: {name}", category.CategoryName);
+            Console.WriteLine("Category added successfully.");
+        }
     }
+
     if (!isValid)
     {
-      foreach (var result in results)
-      {
-        logger.Error($"{result.MemberNames.First()} : {result.ErrorMessage}");
-      }
+        foreach (var result in results)
+        {
+            logger.Error("{member} : {message}", result.MemberNames.First(), result.ErrorMessage);
+            Console.WriteLine($"{result.MemberNames.First()} : {result.ErrorMessage}");
+        }
     }
-  }
+}
   else if (choice == "3")
   {
     var db = new DataContext();
