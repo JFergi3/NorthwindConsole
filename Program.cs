@@ -118,7 +118,7 @@ do
       Console.ForegroundColor = ConsoleColor.Red;
       Console.WriteLine("Product not found.");
       Console.ForegroundColor = ConsoleColor.White;
-      
+
       logger.Warn("Product ID {id} not found.", id);
       continue;
     }
@@ -139,42 +139,82 @@ do
     logger.Info("Displayed Product ID {id}.", id);
   }
 
-  else if (choice == "3") // Add Product 
+  else if (choice == "3") // Add Product
   {
-    var db = new DataContext();
-    var query = db.Categories.OrderBy(p => p.CategoryId);
+    using var db = new DataContext();
 
-    Console.WriteLine("Select the category whose products you want to display:");
-    Console.ForegroundColor = ConsoleColor.DarkRed;
-    foreach (var item in query)
+    Product product = new();
+
+    Console.WriteLine("Enter Product Name:");
+    product.ProductName = Console.ReadLine()!;
+
+    Console.WriteLine("Enter Quantity Per Unit:");
+    product.QuantityPerUnit = Console.ReadLine();
+
+    Console.WriteLine("Enter Unit Price:");
+    if (decimal.TryParse(Console.ReadLine(), out decimal unitPrice))
     {
-      Console.WriteLine($"{item.CategoryId}) {item.CategoryName}");
+      product.UnitPrice = unitPrice;
     }
+    else
+    {
+      Console.ForegroundColor = ConsoleColor.Red;
+      Console.WriteLine("Invalid price. Product was not added.");
+      Console.ForegroundColor = ConsoleColor.White;
+      logger.Warn("Invalid UnitPrice entered when adding product.");
+      continue;
+    }
+
+    Console.WriteLine("Enter Units In Stock:");
+    if (short.TryParse(Console.ReadLine(), out short unitsInStock))
+    {
+      product.UnitsInStock = unitsInStock;
+    }
+    else
+    {
+      Console.ForegroundColor = ConsoleColor.Red;
+      Console.WriteLine("Invalid units in stock. Product was not added.");
+      Console.ForegroundColor = ConsoleColor.White;
+      logger.Warn("Invalid UnitsInStock entered when adding product.");
+      continue;
+    }
+
+    Console.WriteLine("Select Category ID:");
+    var categories = db.Categories.OrderBy(c => c.CategoryId);
+
+    foreach (var category in categories)
+    {
+      Console.WriteLine($"{category.CategoryId}) {category.CategoryName}");
+    }
+
+    if (int.TryParse(Console.ReadLine(), out int categoryId))
+    {
+      product.CategoryId = categoryId;
+    }
+    else
+    {
+      Console.ForegroundColor = ConsoleColor.Red;
+      Console.WriteLine("Invalid category ID. Product was not added.");
+      Console.ForegroundColor = ConsoleColor.White;
+      logger.Warn("Invalid CategoryId entered when adding product.");
+      continue;
+    }
+
+    Console.WriteLine("Is this product discontinued? y/n");
+    string? discontinuedChoice = Console.ReadLine();
+
+    product.Discontinued = discontinuedChoice?.ToLower() == "y";
+
+    db.Products.Add(product);
+    db.SaveChanges();
+
+    Console.ForegroundColor = ConsoleColor.Green;
+    Console.WriteLine("Product added successfully.");
     Console.ForegroundColor = ConsoleColor.White;
-    if (!int.TryParse(Console.ReadLine(), out int id))
-    {
-      Console.WriteLine("Invalid categoryID.");
-      logger.Warn("Invalid category ID entered");
-      continue;
-    }
-    Console.Clear();
-    logger.Info($"CategoryId {id} selected");
-    Category? category = db.Categories
-        .Include(c => c.Products.Where(p => !p.Discontinued))
-        .FirstOrDefault(c => c.CategoryId == id);
-    if (category == null)
-    {
-      Console.WriteLine("Category not found.");
-      logger.Warn("CategoryId {id} not found", id);
-      continue;
-    }
 
-    Console.WriteLine($"{category.CategoryName} - {category.Description}");
-    foreach (Product p in category.Products)
-    {
-      Console.WriteLine($"\t{p.ProductName}");
-    }
+    logger.Info("Product added: {name}", product.ProductName);
   }
+
   else if (choice == "4") // Edit Product
   {
     var db = new DataContext();
