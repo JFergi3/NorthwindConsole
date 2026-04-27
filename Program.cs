@@ -25,11 +25,7 @@ do
   if (choice == "1")
   {
     // display categories
-    var configuration = new ConfigurationBuilder()
-            .AddJsonFile($"appsettings.json");
-
-    var config = configuration.Build();
-
+    
     var db = new DataContext();
     var query = db.Categories.OrderBy(p => p.CategoryName);
 
