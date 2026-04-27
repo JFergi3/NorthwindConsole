@@ -14,56 +14,87 @@ logger.Info("Program started");
 do
 {
   Console.WriteLine("NORTHWIND DATABASE MENU");
-    Console.WriteLine("-----------------------");
+  Console.WriteLine("-----------------------");
 
-    Console.WriteLine("PRODUCTS");
-    Console.WriteLine("1) Display products");
-    Console.WriteLine("2) Display specific product");
-    Console.WriteLine("3) Add product");
-    Console.WriteLine("4) Edit product");
-    Console.WriteLine("5) Delete product");
+  Console.WriteLine("PRODUCTS");
+  Console.WriteLine("1) Display products");
+  Console.WriteLine("2) Display specific product");
+  Console.WriteLine("3) Add product");
+  Console.WriteLine("4) Edit product");
+  Console.WriteLine("5) Delete product");
 
-    Console.WriteLine();
+  Console.WriteLine();
 
-    Console.WriteLine("CATEGORIES");
-    Console.WriteLine("6) Display categories");
-    Console.WriteLine("7) Display specific category with active products");
-    Console.WriteLine("8) Display all categories with active products");
-    Console.WriteLine("9) Add category");
-    Console.WriteLine("10) Edit category");
-    Console.WriteLine("11) Delete category");
+  Console.WriteLine("CATEGORIES");
+  Console.WriteLine("6) Display categories");
+  Console.WriteLine("7) Display specific category with active products");
+  Console.WriteLine("8) Display all categories with active products");
+  Console.WriteLine("9) Add category");
+  Console.WriteLine("10) Edit category");
+  Console.WriteLine("11) Delete category");
 
-    Console.WriteLine();
+  Console.WriteLine();
 
-    Console.WriteLine("EXTRA");
-    Console.WriteLine("12) Product search/report");
+  Console.WriteLine("EXTRA");
+  Console.WriteLine("12) Product search/report");
 
-    Console.WriteLine();
-    Console.WriteLine("Press Enter to quit");
+  Console.WriteLine();
+  Console.WriteLine("Press Enter to quit");
 
-    Console.Write("Choose an option: ");
-    string? choice = Console.ReadLine();
+  Console.Write("Choose an option: ");
+  string? choice = Console.ReadLine();
 
-    Console.Clear();
-    logger.Info("Option {choice} selected", choice);
+  Console.Clear();
+  logger.Info("Option {choice} selected", choice);
 
   if (choice == "1") // Display Products
   {
-    
-    var db = new DataContext();
-    var query = db.Categories.OrderBy(p => p.CategoryName);
+    Console.WriteLine("Display Products:");
+    Console.WriteLine("1) All Products");
+    Console.WriteLine("2) Active Products");
+    Console.WriteLine("3) Discontinued Products");
+
+    string? filter = Console.ReadLine();
+
+    using var db = new DataContext();
+
+    var query = db.Products.AsQueryable();
+
+    if (filter == "2")
+    {
+      query = query.Where(p => !p.Discontinued);
+    }
+    else if (filter == "3")
+    {
+      query = query.Where(p => p.Discontinued);
+    }
+
+    query = query.OrderBy(p => p.ProductName);
 
     Console.ForegroundColor = ConsoleColor.Green;
     Console.WriteLine($"{query.Count()} records returned");
-    Console.ForegroundColor = ConsoleColor.Magenta;
-    foreach (var item in query)
-    {
-      Console.WriteLine($"{item.CategoryName} - {item.Description}");
-    }
     Console.ForegroundColor = ConsoleColor.White;
+
+    foreach (var product in query)
+    {
+      if (product.Discontinued)
+      {
+        Console.ForegroundColor = ConsoleColor.Red;
+        Console.WriteLine($"{product.ProductName} (DISCONTINUED)");
+      }
+      else
+      {
+        Console.ForegroundColor = ConsoleColor.White;
+        Console.WriteLine(product.ProductName);
+      }
+    }
+
+    Console.ForegroundColor = ConsoleColor.White;
+    logger.Info("Displayed products with filter {filter}", filter);
   }
+
   else if (choice == "2") // Display Specific Product
-{
+  {
     Category category = new();
 
     Console.WriteLine("Enter Category Name:");
@@ -81,30 +112,30 @@ do
 
     if (isValid)
     {
-        if (db.Categories.Any(c => c.CategoryName == category.CategoryName))
-        {
-            isValid = false;
-            results.Add(new ValidationResult("Category name already exists.", ["CategoryName"]));
-        }
-        else
-        {
-            db.Categories.Add(category);
-            db.SaveChanges();
+      if (db.Categories.Any(c => c.CategoryName == category.CategoryName))
+      {
+        isValid = false;
+        results.Add(new ValidationResult("Category name already exists.", ["CategoryName"]));
+      }
+      else
+      {
+        db.Categories.Add(category);
+        db.SaveChanges();
 
-            logger.Info("Category added: {name}", category.CategoryName);
-            Console.WriteLine("Category added successfully.");
-        }
+        logger.Info("Category added: {name}", category.CategoryName);
+        Console.WriteLine("Category added successfully.");
+      }
     }
 
     if (!isValid)
     {
-        foreach (var result in results)
-        {
-            logger.Error("{member} : {message}", result.MemberNames.First(), result.ErrorMessage);
-            Console.WriteLine($"{result.MemberNames.First()} : {result.ErrorMessage}");
-        }
+      foreach (var result in results)
+      {
+        logger.Error("{member} : {message}", result.MemberNames.First(), result.ErrorMessage);
+        Console.WriteLine($"{result.MemberNames.First()} : {result.ErrorMessage}");
+      }
     }
-}
+  }
   else if (choice == "3") // Add Product 
   {
     var db = new DataContext();
@@ -155,37 +186,37 @@ do
     }
   }
   else if (choice == "5") // Delete Product
-    {
-      
-    }
+  {
+
+  }
   else if (choice == "6") // Display categories
-    {
-        
-    }
+  {
+
+  }
   else if (choice == "7") // Display specific category with active products
-    {
-       
-    }
+  {
+
+  }
   else if (choice == "8") // Display all categories with active products
-    {
-       
-    }
+  {
+
+  }
   else if (choice == "9") // Add category
-    {
-       
-    }
+  {
+
+  }
   else if (choice == "10")// Edit category
-    {
-        
-    }
+  {
+
+  }
   else if (choice == "11") // Delete category
-    {
-       
-    }
+  {
+
+  }
   else if (choice == "12") // Exceptional feature / product search report
-    {
-    
-    }   
+  {
+
+  }
   else if (String.IsNullOrEmpty(choice))
   {
     break;
