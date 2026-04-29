@@ -429,7 +429,60 @@ do
   }
   else if (choice == "7") // Display specific category with active products
   {
+    using var db = new DataContext();
 
+    Console.WriteLine("Select the category whose active products you want to display:");
+
+    var categories = db.Categories
+        .OrderBy(c => c.CategoryId)
+        .ToList();
+
+    foreach (var item in categories)
+    {
+      Console.WriteLine($"{item.CategoryId}) {item.CategoryName}");
+    }
+
+    Console.WriteLine("Enter Category ID:");
+
+    if (!int.TryParse(Console.ReadLine(), out int id))
+    {
+      Console.ForegroundColor = ConsoleColor.Red;
+      Console.WriteLine("Invalid Category ID.");
+      Console.ForegroundColor = ConsoleColor.White;
+
+      logger.Warn("Invalid Category ID entered for specific category display.");
+      continue;
+    }
+
+    Category? category = db.Categories
+        .Include(c => c.Products.Where(p => !p.Discontinued))
+        .FirstOrDefault(c => c.CategoryId == id);
+
+    if (category == null)
+    {
+      Console.ForegroundColor = ConsoleColor.Red;
+      Console.WriteLine("Category not found.");
+      Console.ForegroundColor = ConsoleColor.White;
+
+      logger.Warn("Category ID {id} not found for specific category display.", id);
+      continue;
+    }
+
+    Console.WriteLine($"{category.CategoryName}");
+
+    if (!category.Products.Any())
+    {
+      Console.WriteLine("\tNo active products found.");
+    }
+    else
+    {
+      foreach (Product product in category.Products.OrderBy(p => p.ProductName))
+      {
+        Console.WriteLine($"\t{product.ProductName}");
+      }
+    }
+
+    logger.Info("Displayed Category ID {id} with active products.", id);
   }
   else if (choice == "8") // Display all categories with active products
   {
