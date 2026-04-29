@@ -6,9 +6,10 @@ namespace NorthwindConsole.Model;
 
 public partial class Category
 {
-  [StringLength(50)]
-  public int CategoryId { get; set; }
+  public int CategoryId {get; set}
+  
   [Required(ErrorMessage = "Category Name is required.")]
+  [StringLength(15, ErrorMessage = "Category Name cannot be longer than 15 characters.")]
   public string CategoryName { get; set; } = null!;
 
   public string? Description { get; set; }
