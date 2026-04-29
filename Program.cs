@@ -574,7 +574,7 @@ do
         logger.Error("{member} : {message}", result.MemberNames.First(), result.ErrorMessage);
       }
     }
-  }
+  }  
   else if (choice == "10")// Edit category
   {
     using var db = new DataContext();
