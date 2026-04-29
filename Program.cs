@@ -486,8 +486,31 @@ do
   }
   else if (choice == "8") // Display all categories with active products
   {
+    using var db = new DataContext();
 
-  }
+    var categories = db.Categories
+        .Include(c => c.Products.Where(p => !p.Discontinued))
+        .OrderBy(c => c.CategoryName);
+
+    foreach (var category in categories)
+    {
+        Console.WriteLine($"{category.CategoryName}");
+
+        if (!category.Products.Any())
+        {
+            Console.WriteLine("\tNo active products.");
+        }
+        else
+        {
+            foreach (var product in category.Products.OrderBy(p => p.ProductName))
+            {
+                Console.WriteLine($"\t{product.ProductName}");
+            }
+        }
+    }
+
+    logger.Info("Displayed all categories with active products.");
+}
   else if (choice == "9") // Add category
   {
 
