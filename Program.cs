@@ -346,10 +346,82 @@ do
   }
   // --------------------------------------------------------Grade C complete----------------------------------------------------
 
-  
+
   else if (choice == "5") // Delete Product
   {
+    using var db = new DataContext();
 
+    Console.WriteLine("Enter Product ID to delete:");
+    if (!int.TryParse(Console.ReadLine(), out int id))
+    {
+      Console.ForegroundColor = ConsoleColor.Red;
+      Console.WriteLine("Invalid Product ID.");
+      Console.ForegroundColor = ConsoleColor.White;
+      logger.Warn("Invalid Product ID entered for delete.");
+      continue;
+    }
+
+    Product? product = db.Products
+        .Include(p => p.OrderDetails)
+        .FirstOrDefault(p => p.ProductId == id);
+
+    if (product == null)
+    {
+      Console.ForegroundColor = ConsoleColor.Red;
+      Console.WriteLine("Product not found.");
+      Console.ForegroundColor = ConsoleColor.White;
+      logger.Warn("Product ID {id} not found for delete.", id);
+      continue;
+    }
+
+    if (product.OrderDetails.Any())
+    {
+      Console.ForegroundColor = ConsoleColor.Yellow;
+      Console.WriteLine("This product cannot be deleted because it is connected to existing order details.");
+      Console.WriteLine("To avoid orphaned records, mark it as discontinued instead? y/n");
+      Console.ForegroundColor = ConsoleColor.White;
+
+      string? discontinueChoice = Console.ReadLine();
+
+      if (discontinueChoice?.ToLower() == "y")
+      {
+        product.Discontinued = true;
+        db.SaveChanges();
+
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine("Product marked as discontinued.");
+        Console.ForegroundColor = ConsoleColor.White;
+
+        logger.Info("Product ID {id} marked as discontinued instead of deleted due to related OrderDetails.", id);
+      }
+      else
+      {
+        Console.WriteLine("Product was not deleted.");
+        logger.Info("Delete canceled for Product ID {id} because related OrderDetails exist.", id);
+      }
+
+      continue;
+    }
+
+    Console.WriteLine($"Are you sure you want to delete {product.ProductName}? y/n");
+    string? confirm = Console.ReadLine();
+
+    if (confirm?.ToLower() == "y")
+    {
+      db.Products.Remove(product);
+      db.SaveChanges();
+
+      Console.ForegroundColor = ConsoleColor.Green;
+      Console.WriteLine("Product deleted successfully.");
+      Console.ForegroundColor = ConsoleColor.White;
+
+      logger.Info("Product ID {id} deleted.", id);
+    }
+    else
+    {
+      Console.WriteLine("Delete canceled.");
+      logger.Info("Delete canceled for Product ID {id}.", id);
+    }
   }
   else if (choice == "6") // Display categories
   {
