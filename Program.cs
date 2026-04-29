@@ -445,7 +445,61 @@ do
   }
   else if (choice == "11") // Delete category
   {
+    using var db = new DataContext();
 
+    Console.WriteLine("Enter Category ID to delete:");
+    if (!int.TryParse(Console.ReadLine(), out int id))
+    {
+      Console.ForegroundColor = ConsoleColor.Red;
+      Console.WriteLine("Invalid Category ID.");
+      Console.ForegroundColor = ConsoleColor.White;
+      logger.Warn("Invalid Category ID entered for delete.");
+      continue;
+    }
+
+    Category? category = db.Categories
+        .Include(c => c.Products)
+        .FirstOrDefault(c => c.CategoryId == id);
+
+    if (category == null)
+    {
+      Console.ForegroundColor = ConsoleColor.Red;
+      Console.WriteLine("Category not found.");
+      Console.ForegroundColor = ConsoleColor.White;
+      logger.Warn("Category ID {id} not found for delete.", id);
+      continue;
+    }
+
+    if (category.Products.Any())
+    {
+      Console.ForegroundColor = ConsoleColor.Yellow;
+      Console.WriteLine("This category cannot be deleted because it has related products.");
+      Console.WriteLine("To avoid orphaned product records, delete or move the products first.");
+      Console.ForegroundColor = ConsoleColor.White;
+
+      logger.Info("Delete blocked for Category ID {id} because related products exist.", id);
+      continue;
+    }
+
+    Console.WriteLine($"Are you sure you want to delete {category.CategoryName}? y/n");
+    string? confirm = Console.ReadLine();
+
+    if (confirm?.ToLower() == "y")
+    {
+      db.Categories.Remove(category);
+      db.SaveChanges();
+
+      Console.ForegroundColor = ConsoleColor.Green;
+      Console.WriteLine("Category deleted successfully.");
+      Console.ForegroundColor = ConsoleColor.White;
+
+      logger.Info("Category ID {id} deleted.", id);
+    }
+    else
+    {
+      Console.WriteLine("Delete canceled.");
+      logger.Info("Delete canceled for Category ID {id}.", id);
+    }
   }
   else if (choice == "12") // Exceptional feature / product search report
   {
