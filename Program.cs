@@ -484,7 +484,7 @@ do
 
     logger.Info("Displayed Category ID {id} with active products.", id);
   }
-  else if (choice == "8") // Display all categories with active products
+  else if (choice == "8") // Display all categories with active products 
   {
     using var db = new DataContext();
 
