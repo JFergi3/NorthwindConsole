@@ -441,7 +441,69 @@ do
   }
   else if (choice == "10")// Edit category
   {
+    using var db = new DataContext();
 
+    Console.WriteLine("Enter Category ID to edit:");
+    if (!int.TryParse(Console.ReadLine(), out int id))
+    {
+      Console.ForegroundColor = ConsoleColor.Red;
+      Console.WriteLine("Invalid Category ID.");
+      Console.ForegroundColor = ConsoleColor.White;
+      logger.Warn("Invalid Category ID entered for edit.");
+      continue;
+    }
+
+    Category? category = db.Categories.FirstOrDefault(c => c.CategoryId == id);
+
+    if (category == null)
+    {
+      Console.ForegroundColor = ConsoleColor.Red;
+      Console.WriteLine("Category not found.");
+      Console.ForegroundColor = ConsoleColor.White;
+      logger.Warn("Category ID {id} not found for edit.", id);
+      continue;
+    }
+
+    Console.WriteLine($"Editing: {category.CategoryName}");
+    Console.WriteLine("Press Enter to keep the current value.");
+
+    Console.WriteLine($"Category Name ({category.CategoryName}):");
+    string? categoryName = Console.ReadLine();
+
+    if (!string.IsNullOrWhiteSpace(categoryName))
+    {
+      bool nameExists = db.Categories.Any(c =>
+          c.CategoryName == categoryName &&
+          c.CategoryId != category.CategoryId);
+
+      if (nameExists)
+      {
+        Console.ForegroundColor = ConsoleColor.Red;
+        Console.WriteLine("That category name already exists.");
+        Console.ForegroundColor = ConsoleColor.White;
+
+        logger.Warn("Duplicate category name attempted while editing Category ID {id}.", id);
+        continue;
+      }
+
+      category.CategoryName = categoryName;
+    }
+
+    Console.WriteLine($"Description ({category.Description}):");
+    string? description = Console.ReadLine();
+
+    if (!string.IsNullOrWhiteSpace(description))
+    {
+      category.Description = description;
+    }
+
+    db.SaveChanges();
+
+    Console.ForegroundColor = ConsoleColor.Green;
+    Console.WriteLine("Category updated successfully.");
+    Console.ForegroundColor = ConsoleColor.White;
+
+    logger.Info("Category ID {id} updated.", id);
   }
   else if (choice == "11") // Delete category
   {
