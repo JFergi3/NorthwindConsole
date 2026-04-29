@@ -528,7 +528,52 @@ do
   }
   else if (choice == "9") // Add category
   {
+    using var db = new DataContext();
 
+    Category category = new();
+
+    Console.WriteLine("Enter Category Name:");
+    category.CategoryName = Console.ReadLine()!;
+
+    Console.WriteLine("Enter Category Description:");
+    category.Description = Console.ReadLine();
+
+    ValidationContext context = new(category, null, null);
+    List<ValidationResult> results = new();
+
+    bool isValid = Validator.TryValidateObject(category, context, results, true);
+
+    if (isValid)
+    {
+      if (db.Categories.Any(c => c.CategoryName == category.CategoryName))
+      {
+        isValid = false;
+        results.Add(new ValidationResult("Category name already exists.", new[] { "CategoryName" }));
+      }
+      else
+      {
+        db.Categories.Add(category);
+        db.SaveChanges();
+
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine("Category added successfully.");
+        Console.ForegroundColor = ConsoleColor.White;
+
+        logger.Info("Category added: {name}", category.CategoryName);
+      }
+    }
+
+    if (!isValid)
+    {
+      foreach (var result in results)
+      {
+        Console.ForegroundColor = ConsoleColor.Red;
+        Console.WriteLine($"{result.MemberNames.First()} : {result.ErrorMessage}");
+        Console.ForegroundColor = ConsoleColor.White;
+
+        logger.Error("{member} : {message}", result.MemberNames.First(), result.ErrorMessage);
+      }
+    }
   }
   else if (choice == "10")// Edit category
   {
