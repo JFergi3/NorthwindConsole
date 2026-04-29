@@ -425,7 +425,22 @@ do
   }
   else if (choice == "6") // Display categories
   {
+    using var db = new DataContext();
 
+    var categories = db.Categories
+        .OrderBy(c => c.CategoryName)
+        .ToList();
+
+    Console.ForegroundColor = ConsoleColor.Green;
+    Console.WriteLine($"{categories.Count} records returned");
+    Console.ForegroundColor = ConsoleColor.White;
+
+    foreach (var category in categories)
+    {
+      Console.WriteLine($"{category.CategoryName} - {category.Description}");
+    }
+
+    logger.Info("Displayed all categories.");
   }
   else if (choice == "7") // Display specific category w/active products
   {
@@ -494,23 +509,23 @@ do
 
     foreach (var category in categories)
     {
-        Console.WriteLine($"{category.CategoryName}");
+      Console.WriteLine($"{category.CategoryName}");
 
-        if (!category.Products.Any())
+      if (!category.Products.Any())
+      {
+        Console.WriteLine("\tNo active products.");
+      }
+      else
+      {
+        foreach (var product in category.Products.OrderBy(p => p.ProductName))
         {
-            Console.WriteLine("\tNo active products.");
+          Console.WriteLine($"\t{product.ProductName}");
         }
-        else
-        {
-            foreach (var product in category.Products.OrderBy(p => p.ProductName))
-            {
-                Console.WriteLine($"\t{product.ProductName}");
-            }
-        }
+      }
     }
 
     logger.Info("Displayed all categories with active products.");
-}
+  }
   else if (choice == "9") // Add category
   {
 
