@@ -427,7 +427,7 @@ do
   {
 
   }
-  else if (choice == "7") // Display specific category with active products
+  else if (choice == "7") // Display specific category w/active products
   {
     using var db = new DataContext();
 
