@@ -73,282 +73,29 @@ do
     ProductService.DeleteProduct(logger);
   }
 
-  
   else if (choice == "6") // Display categories
   {
-    using var db = new DataContext();
-
-    var categories = db.Categories
-        .OrderBy(c => c.CategoryName)
-        .ToList();
-
-    Console.ForegroundColor = ConsoleColor.Green;
-    Console.WriteLine($"{categories.Count} records returned");
-    Console.ForegroundColor = ConsoleColor.White;
-
-    foreach (var category in categories)
-    {
-      Console.WriteLine($"{category.CategoryName} - {category.Description}");
-    }
-
-    logger.Info("Displayed all categories.");
+    CategoryService.DisplayCategories(logger);
   }
   else if (choice == "7") // Display specific category w/active products
   {
-    using var db = new DataContext();
-
-    Console.WriteLine("Select the category whose active products you want to display:");
-
-    var categories = db.Categories
-        .OrderBy(c => c.CategoryId)
-        .ToList();
-
-    foreach (var item in categories)
-    {
-      Console.WriteLine($"{item.CategoryId}) {item.CategoryName}");
-    }
-
-    Console.WriteLine("Enter Category ID:");
-
-    if (!int.TryParse(Console.ReadLine(), out int id))
-    {
-      Console.ForegroundColor = ConsoleColor.Red;
-      Console.WriteLine("Invalid Category ID.");
-      Console.ForegroundColor = ConsoleColor.White;
-
-      logger.Warn("Invalid Category ID entered for specific category display.");
-      continue;
-    }
-
-    Category? category = db.Categories
-        .Include(c => c.Products.Where(p => !p.Discontinued))
-        .FirstOrDefault(c => c.CategoryId == id);
-
-    if (category == null)
-    {
-      Console.ForegroundColor = ConsoleColor.Red;
-      Console.WriteLine("Category not found.");
-      Console.ForegroundColor = ConsoleColor.White;
-
-      logger.Warn("Category ID {id} not found for specific category display.", id);
-      continue;
-    }
-
-    Console.WriteLine($"{category.CategoryName}");
-
-    if (!category.Products.Any())
-    {
-      Console.WriteLine("\tNo active products found.");
-    }
-    else
-    {
-      foreach (Product product in category.Products.OrderBy(p => p.ProductName))
-      {
-        Console.WriteLine($"\t{product.ProductName}");
-      }
-    }
-
-    logger.Info("Displayed Category ID {id} with active products.", id);
+    CategoryService.DisplaySpecificCategoryWithProducts(logger);
   }
   else if (choice == "8") // Display all categories with active products 
   {
-    using var db = new DataContext();
-
-    var categories = db.Categories
-        .Include(c => c.Products.Where(p => !p.Discontinued))
-        .OrderBy(c => c.CategoryName);
-
-    foreach (var category in categories)
-    {
-      Console.WriteLine($"{category.CategoryName}");
-
-      if (!category.Products.Any())
-      {
-        Console.WriteLine("\tNo active products.");
-      }
-      else
-      {
-        foreach (var product in category.Products.OrderBy(p => p.ProductName))
-        {
-          Console.WriteLine($"\t{product.ProductName}");
-        }
-      }
-    }
-
-    logger.Info("Displayed all categories with active products.");
+    CategoryService.DisplayAllCategoriesWithProducts(logger);
   }
   else if (choice == "9") // Add category
   {
-    using var db = new DataContext();
-
-    Category category = new();
-
-    Console.WriteLine("Enter Category Name:");
-    category.CategoryName = Console.ReadLine()!;
-
-    Console.WriteLine("Enter Category Description:");
-    category.Description = Console.ReadLine();
-
-    ValidationContext context = new(category, null, null);
-    List<ValidationResult> results = new();
-
-    bool isValid = Validator.TryValidateObject(category, context, results, true);
-
-    if (isValid)
-    {
-      if (db.Categories.Any(c => c.CategoryName == category.CategoryName))
-      {
-        isValid = false;
-        results.Add(new ValidationResult("Category name already exists.", new[] { "CategoryName" }));
-      }
-      else
-      {
-        db.Categories.Add(category);
-        db.SaveChanges();
-
-        Console.ForegroundColor = ConsoleColor.Green;
-        Console.WriteLine("Category added successfully.");
-        Console.ForegroundColor = ConsoleColor.White;
-
-        logger.Info("Category added: {name}", category.CategoryName);
-      }
-    }
-
-    if (!isValid)
-    {
-      foreach (var result in results)
-      {
-        Console.ForegroundColor = ConsoleColor.Red;
-        Console.WriteLine($"{result.MemberNames.First()} : {result.ErrorMessage}");
-        Console.ForegroundColor = ConsoleColor.White;
-
-        logger.Error("{member} : {message}", result.MemberNames.First(), result.ErrorMessage);
-      }
-    }
+    CategoryService.AddCategory(logger);
   }    
   else if (choice == "10")// Edit category
   {
-    using var db = new DataContext();
-
-    Console.WriteLine("Enter Category ID to edit:");
-    if (!int.TryParse(Console.ReadLine(), out int id))
-    {
-      Console.ForegroundColor = ConsoleColor.Red;
-      Console.WriteLine("Invalid Category ID.");
-      Console.ForegroundColor = ConsoleColor.White;
-      logger.Warn("Invalid Category ID entered for edit.");
-      continue;
-    }
-
-    Category? category = db.Categories.FirstOrDefault(c => c.CategoryId == id);
-
-    if (category == null)
-    {
-      Console.ForegroundColor = ConsoleColor.Red;
-      Console.WriteLine("Category not found.");
-      Console.ForegroundColor = ConsoleColor.White;
-      logger.Warn("Category ID {id} not found for edit.", id);
-      continue;
-    }
-
-    Console.WriteLine($"Editing: {category.CategoryName}");
-    Console.WriteLine("Press Enter to keep the current value.");
-
-    Console.WriteLine($"Category Name ({category.CategoryName}):");
-    string? categoryName = Console.ReadLine();
-
-    if (!string.IsNullOrWhiteSpace(categoryName))
-    {
-      bool nameExists = db.Categories.Any(c =>
-          c.CategoryName == categoryName &&
-          c.CategoryId != category.CategoryId);
-
-      if (nameExists)
-      {
-        Console.ForegroundColor = ConsoleColor.Red;
-        Console.WriteLine("That category name already exists.");
-        Console.ForegroundColor = ConsoleColor.White;
-
-        logger.Warn("Duplicate category name attempted while editing Category ID {id}.", id);
-        continue;
-      }
-
-      category.CategoryName = categoryName;
-    }
-
-    Console.WriteLine($"Description ({category.Description}):");
-    string? description = Console.ReadLine();
-
-    if (!string.IsNullOrWhiteSpace(description))
-    {
-      category.Description = description;
-    }
-
-    db.SaveChanges();
-
-    Console.ForegroundColor = ConsoleColor.Green;
-    Console.WriteLine("Category updated successfully.");
-    Console.ForegroundColor = ConsoleColor.White;
-
-    logger.Info("Category ID {id} updated.", id);
+    CategoryService.EditCategory(logger);
   }
   else if (choice == "11") // Delete category
   {
-    using var db = new DataContext();
-
-    Console.WriteLine("Enter Category ID to delete:");
-    if (!int.TryParse(Console.ReadLine(), out int id))
-    {
-      Console.ForegroundColor = ConsoleColor.Red;
-      Console.WriteLine("Invalid Category ID.");
-      Console.ForegroundColor = ConsoleColor.White;
-      logger.Warn("Invalid Category ID entered for delete.");
-      continue;
-    }
-
-    Category? category = db.Categories
-        .Include(c => c.Products)
-        .FirstOrDefault(c => c.CategoryId == id);
-
-    if (category == null)
-    {
-      Console.ForegroundColor = ConsoleColor.Red;
-      Console.WriteLine("Category not found.");
-      Console.ForegroundColor = ConsoleColor.White;
-      logger.Warn("Category ID {id} not found for delete.", id);
-      continue;
-    }
-
-    if (category.Products.Any())
-    {
-      Console.ForegroundColor = ConsoleColor.Yellow;
-      Console.WriteLine("This category cannot be deleted because it has related products.");
-      Console.WriteLine("To avoid orphaned product records, delete or move the products first.");
-      Console.ForegroundColor = ConsoleColor.White;
-
-      logger.Info("Delete blocked for Category ID {id} because related products exist.", id);
-      continue;
-    }
-
-    Console.WriteLine($"Are you sure you want to delete {category.CategoryName}? y/n");
-    string? confirm = Console.ReadLine();
-
-    if (confirm?.ToLower() == "y")
-    {
-      db.Categories.Remove(category);
-      db.SaveChanges();
-
-      Console.ForegroundColor = ConsoleColor.Green;
-      Console.WriteLine("Category deleted successfully.");
-      Console.ForegroundColor = ConsoleColor.White;
-
-      logger.Info("Category ID {id} deleted.", id);
-    }
-    else
-    {
-      Console.WriteLine("Delete canceled.");
-      logger.Info("Delete canceled for Category ID {id}.", id);
-    }
+    CategoryService.DeleteCategory(logger);
   }
   else if (choice == "12") // Exceptional feature / product search report
   {
