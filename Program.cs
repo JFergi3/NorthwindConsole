@@ -51,94 +51,11 @@ do
 
   if (choice == "1") // Display Products
   {
-    Console.WriteLine("Display Products:");
-    Console.WriteLine("1) All Products");
-    Console.WriteLine("2) Active Products");
-    Console.WriteLine("3) Discontinued Products");
-
-    string? filter = Console.ReadLine();
-
-    using var db = new DataContext();
-
-    var query = db.Products.AsQueryable();
-
-    if (filter == "2")
-    {
-      query = query.Where(p => !p.Discontinued);
-    }
-    else if (filter == "3")
-    {
-      query = query.Where(p => p.Discontinued);
-    }
-
-    query = query.OrderBy(p => p.ProductName);
-
-    Console.ForegroundColor = ConsoleColor.Green;
-    Console.WriteLine($"{query.Count()} records returned");
-    Console.ForegroundColor = ConsoleColor.White;
-
-    foreach (var product in query)
-    {
-      if (product.Discontinued)
-      {
-        Console.ForegroundColor = ConsoleColor.Red;
-        Console.WriteLine($"{product.ProductId}) {product.ProductName} (DISCONTINUED)");
-      }
-      else
-      {
-        Console.ForegroundColor = ConsoleColor.White;
-        Console.WriteLine($"{product.ProductId}) {product.ProductName}");
-      }
-    }
-
-    Console.ForegroundColor = ConsoleColor.White;
-    logger.Info("Displayed products with filter {filter}", filter);
-  }
-
+    ProductService.DisplayProducts(logger);
+  }  
   else if (choice == "2") // Display Specific Product
   {
-    using var db = new DataContext();
-
-    Console.WriteLine("Enter Product ID:");
-    if (!int.TryParse(Console.ReadLine(), out int id))
-    {
-      Console.ForegroundColor = ConsoleColor.Red;
-      Console.WriteLine("Invalid Product ID.");
-      Console.ForegroundColor = ConsoleColor.White;
-
-      logger.Warn("Invalid Product ID entered.");
-      continue;
-    }
-
-    Product? product = db.Products
-        .Include(p => p.Category)
-        .Include(p => p.Supplier)
-        .FirstOrDefault(p => p.ProductId == id);
-
-    if (product == null)
-    {
-      Console.ForegroundColor = ConsoleColor.Red;
-      Console.WriteLine("Product not found.");
-      Console.ForegroundColor = ConsoleColor.White;
-
-      logger.Warn("Product ID {id} not found.", id);
-      continue;
-    }
-
-    Console.WriteLine($"Product ID: {product.ProductId}");
-    Console.WriteLine($"Product Name: {product.ProductName}");
-    Console.WriteLine($"Supplier ID: {product.SupplierId}");
-    Console.WriteLine($"Supplier: {product.Supplier?.CompanyName ?? "None"}");
-    Console.WriteLine($"Category ID: {product.CategoryId}");
-    Console.WriteLine($"Category: {product.Category?.CategoryName ?? "None"}");
-    Console.WriteLine($"Quantity Per Unit: {product.QuantityPerUnit}");
-    Console.WriteLine($"Unit Price: {product.UnitPrice:C}");
-    Console.WriteLine($"Units In Stock: {product.UnitsInStock}");
-    Console.WriteLine($"Units On Order: {product.UnitsOnOrder}");
-    Console.WriteLine($"Reorder Level: {product.ReorderLevel}");
-    Console.WriteLine($"Discontinued: {(product.Discontinued ? "Yes" : "No")}");
-
-    logger.Info("Displayed Product ID {id}.", id);
+    ProductService.DisplaySpecificProduct(logger);
   }
 
   else if (choice == "3") // Add Product
