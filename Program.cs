@@ -4,7 +4,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.EntityFrameworkCore;
 using NorthwindConsole.Model;
 using System.ComponentModel.DataAnnotations;
+using NorthwindConsole.Services;
 string path = Directory.GetCurrentDirectory() + "//nlog.config";
+
 
 // create instance of Logger
 var logger = LogManager.Setup().LoadConfigurationFromFile(path).GetCurrentClassLogger();
