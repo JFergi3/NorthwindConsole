@@ -161,6 +161,9 @@ public static class ProductService
     {
         using var db = new DataContext();
 
+        DisplayProductIdList(db);
+        Console.WriteLine();
+
         Console.WriteLine("Enter Product ID to edit:");
         if (!int.TryParse(Console.ReadLine(), out int id))
         {
@@ -233,6 +236,8 @@ public static class ProductService
     {
         using var db = new DataContext();
 
+        DisplayProductIdList(db);
+        Console.WriteLine();
         Console.WriteLine("Enter Product ID to delete:");
         if (!int.TryParse(Console.ReadLine(), out int id))
         {
@@ -294,5 +299,24 @@ public static class ProductService
         }
     }
     //--------------Product ID Helper Method-------------------------------------------------
-    
+    private static void DisplayProductIdList(DataContext db)
+    {
+        var products = db.Products
+            .OrderBy(p => p.ProductId)
+            .Select(p => new { p.ProductId, p.ProductName, p.Discontinued });
+
+        foreach (var product in products)
+        {
+            if (product.Discontinued)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"{product.ProductId}) {product.ProductName} (DISCONTINUED)");
+                Console.ForegroundColor = ConsoleColor.White;
+            }
+            else
+            {
+                Console.WriteLine($"{product.ProductId}) {product.ProductName}");
+            }
+        }
+    }
 }
