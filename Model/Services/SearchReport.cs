@@ -112,7 +112,7 @@ public static class SearchReport
 
         var categories = db.Categories
             .Include(c => c.Products.Where(p => !p.Discontinued))
-            .Where(c => c.CategoryName.Contains(search))
+            .Where(c => c.CategoryName.ToLower().Contains(search))
             .OrderBy(c => c.CategoryName)
             .ToList();
 
