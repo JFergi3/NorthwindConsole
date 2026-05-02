@@ -29,7 +29,7 @@ public static class MenuService
         Console.WriteLine();
 
         Console.WriteLine("EXTRA");
-        Console.WriteLine("12) Product search/report");
+        Console.WriteLine("12) Search Products/Categories");
 
         Console.WriteLine();
         Console.WriteLine("Press Enter to quit");
