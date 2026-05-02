@@ -46,7 +46,7 @@ public static class SearchReport
 
         var products = db.Products
             .Include(p => p.Category)
-            .Where(p => p.ProductName.Contains(search))
+            .Where(p => p.ProductName.ToLower().Contains(search))
             .OrderBy(p => p.ProductName)
             .ToList();
 
