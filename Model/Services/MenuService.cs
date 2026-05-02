@@ -87,7 +87,7 @@ public static class MenuService
         }
         else if (choice == "12")
         {
-            SearchReport.ProductSearch(logger);
+            SearchReport.Run(logger);
         }
         else if (string.IsNullOrWhiteSpace(choice))
         {
