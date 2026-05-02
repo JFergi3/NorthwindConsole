@@ -87,7 +87,7 @@ public static class MenuService
         }
         else if (choice == "12")
         {
-            Console.WriteLine("Option 12 coming soon.");
+            SearchReport.ProductSearch(logger);
         }
         else if (string.IsNullOrWhiteSpace(choice))
         {
