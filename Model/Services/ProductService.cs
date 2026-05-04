@@ -124,6 +124,7 @@ public static class ProductService
             logger.Warn("Invalid UnitsInStock entered when adding product.");
             return;
         }
+
         product.UnitsInStock = unitsInStock;
 
         Console.WriteLine("Select Category ID:");
@@ -145,6 +146,52 @@ public static class ProductService
             logger.Warn("Nonexistent CategoryId {categoryId} entered when adding product.", categoryId);
             return;
         }
+
+        // SUPPLIER
+        Console.WriteLine("Select Supplier ID, or press Enter for none:");
+        foreach (var supplier in db.Suppliers.OrderBy(s => s.SupplierId))
+        {
+            Console.WriteLine($"{supplier.SupplierId}) {supplier.CompanyName}");
+        }
+
+        string? supplierInput = Console.ReadLine();
+
+        if (!string.IsNullOrWhiteSpace(supplierInput))
+        {
+            if (!int.TryParse(supplierInput, out int supplierId))
+            {
+                ConsoleHelper.WriteError("Invalid supplier ID. Product was not added.");
+                logger.Warn("Invalid SupplierId entered when adding product.");
+                return;
+            }
+
+            if (!db.Suppliers.Any(s => s.SupplierId == supplierId))
+            {
+                ConsoleHelper.WriteError("Supplier does not exist. Product was not added.");
+                logger.Warn("Nonexistent SupplierId {supplierId} entered when adding product.", supplierId);
+                return;
+            }
+
+            product.SupplierId = supplierId;
+        }
+
+        Console.WriteLine("Enter Units On Order:");
+        if (!short.TryParse(Console.ReadLine(), out short unitsOnOrder))
+        {
+            ConsoleHelper.WriteError("Invalid units on order. Product was not added.");
+            logger.Warn("Invalid UnitsOnOrder entered when adding product.");
+            return;
+        }
+        product.UnitsOnOrder = unitsOnOrder;
+
+        Console.WriteLine("Enter Reorder Level:");
+        if (!short.TryParse(Console.ReadLine(), out short reorderLevel))
+        {
+            ConsoleHelper.WriteError("Invalid reorder level. Product was not added.");
+            logger.Warn("Invalid ReorderLevel entered when adding product.");
+            return;
+        }
+        product.ReorderLevel = reorderLevel;
 
         product.CategoryId = categoryId;
 
@@ -220,6 +267,64 @@ public static class ProductService
                 logger.Warn("Invalid UnitsInStock while editing Product ID {id}", id);
                 return;
             }
+        }
+
+        // SUPPLIER
+        Console.WriteLine($"Supplier ID ({product.SupplierId}) - press Enter to keep:");
+        foreach (var supplier in db.Suppliers.OrderBy(s => s.SupplierId))
+        {
+            Console.WriteLine($"{supplier.SupplierId}) {supplier.CompanyName}");
+        }
+
+        string? supplierInput = Console.ReadLine();
+
+        if (!string.IsNullOrWhiteSpace(supplierInput))
+        {
+            if (!int.TryParse(supplierInput, out int supplierId))
+            {
+                ConsoleHelper.WriteError("Invalid supplier ID.");
+                logger.Warn("Invalid SupplierId while editing Product ID {id}", id);
+                return;
+            }
+
+            if (!db.Suppliers.Any(s => s.SupplierId == supplierId))
+            {
+                ConsoleHelper.WriteError("Supplier does not exist.");
+                logger.Warn("Nonexistent SupplierId {supplierId} while editing Product ID {id}", supplierId, id);
+                return;
+            }
+
+            product.SupplierId = supplierId;
+        }
+
+        Console.WriteLine($"Units On Order ({product.UnitsOnOrder}) - press Enter to keep:");
+        string? unitsOnOrderInput = Console.ReadLine();
+
+        if (!string.IsNullOrWhiteSpace(unitsOnOrderInput))
+        {
+            if (!short.TryParse(unitsOnOrderInput, out short unitsOnOrder))
+            {
+                ConsoleHelper.WriteError("Invalid units on order.");
+                logger.Warn("Invalid UnitsOnOrder while editing Product ID {id}", id);
+                return;
+            }
+
+            product.UnitsOnOrder = unitsOnOrder;
+        }
+
+        Console.WriteLine($"Reorder Level ({product.ReorderLevel}) - press Enter to keep:");
+        string? reorderLevelInput = Console.ReadLine();
+
+        if (!string.IsNullOrWhiteSpace(reorderLevelInput))
+        {
+            if (!short.TryParse(reorderLevelInput, out short reorderLevel))
+            {
+                ConsoleHelper.WriteError("Invalid reorder level.");
+                logger.Warn("Invalid ReorderLevel while editing Product ID {id}", id);
+                return;
+            }
+
+            product.ReorderLevel = reorderLevel;
         }
 
         Console.WriteLine($"Discontinued ({(product.Discontinued ? "Yes" : "No")}) y/n:");
