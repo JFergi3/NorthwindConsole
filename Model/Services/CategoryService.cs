@@ -19,7 +19,7 @@ public static class CategoryService
 
         foreach (var category in categories)
         {
-            Console.WriteLine($"{category.CategoryName} - {category.Description}");
+            Console.WriteLine($"{category.CategoryId}) {category.CategoryName} - {category.Description}");
         }
 
         logger.Info("Displayed all categories.");
@@ -202,7 +202,7 @@ public static class CategoryService
         ConsoleHelper.WriteSuccess("Category updated successfully.");
         logger.Info("Category ID {id} updated.", id);
     }
-    public static void DeleteCategory(Logger logger)
+    public static void DeleteCategory(Logger logger) // Choice 11
     {
         using var db = new DataContext();
 
