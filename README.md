@@ -4,7 +4,7 @@ This is a menu-driven C# console application built with Entity Framework Core us
 
 View Menu UI Demo by clicking on link below.
 
-https://youtu.be/PGRfiaotCKM
+https://youtu.be/rUJi-hKlfYY
 
 ## Features
 - Full CRUD operations for Products and Categories
