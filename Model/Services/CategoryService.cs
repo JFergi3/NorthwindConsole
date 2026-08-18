@@ -5,6 +5,7 @@ using NLog;
 
 namespace NorthwindConsole.Services;
 // TEST
+// TEST 2
 
 public static class CategoryService
 {
