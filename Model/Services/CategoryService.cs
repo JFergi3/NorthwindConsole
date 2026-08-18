@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using NLog;
 
 namespace NorthwindConsole.Services;
+// TEST
 
 public static class CategoryService
 {
